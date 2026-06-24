@@ -6,31 +6,39 @@
 
 using namespace std;
 
+string datafile = "resources/save/state.bin";
+
 int main() {
+    util u = util();
+    u.read_txt("resources/trainingdata/book1.txt");
+
     LSTM lstm = LSTM();
+    bool loadedData = lstm.load(datafile);
 
     string test = "abcabcabc";
     string test_target = test.substr(1) + test.substr(0, 1);
 
-    vector<vector<int>> trainingData = {tokenize(test)};
-    vector<vector<int>> trainingDataTargets = {tokenize(test_target)};
+    vector<vector<int>> trainingData = {u.tokenize(test)};
+    vector<vector<int>> trainingDataTargets = {u.tokenize(test_target)};
 
-    lstm.train(trainingData, trainingDataTargets, 10000);
+    if (!loadedData) {
+        lstm.train(trainingData, trainingDataTargets, 10000);
+        lstm.save(datafile);
+    }
 
     int times = 10;
     char last = *"c";
 
-    //lstm.reset();
+    lstm.reset();
     lstm.activate(trainingData[0]);
 
     for (int i=0; i<times; i++) {
-        int token = last - 'a' + 1;
+        int token = u.vocab.find(last);
         int result = lstm.activate({token});
 
-        char lowerLetter = 'a' + (result - 1);
-        last = lowerLetter;
+        last = u.vocab[result];
 
-        cout << lowerLetter << endl;
+        cout << last << endl;
     }
 
     return 0;

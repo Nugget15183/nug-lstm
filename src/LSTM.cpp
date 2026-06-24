@@ -1,5 +1,7 @@
 #include "LSTM.h"
 #include "matrix.hpp"
+#include <iostream>
+#include <fstream>
 
 double sigmoid(double z) {
     return 1 / (1 + exp(-z));
@@ -275,4 +277,89 @@ int LSTM::activate(vector<int> input) {
 
     int predicted = max_element(probs.begin(), probs.end()) - probs.begin();
     return predicted;
+}
+
+void LSTM::save(string filename) {
+    ofstream outFile(filename, std::ios::out | std::ios::binary);
+
+    if (outFile.is_open()) {
+        for (int x=0; x < c.inputSize; x++) {
+            for (int y=0; y < c.size; y++) {
+                double value = c.W_Out[x][y];
+
+                outFile.write((char*)&value, sizeof(double));
+            }
+        }
+
+        for (int j=0; j < c.size; j++) {
+            for (int w = 0; w < 1 + c.size; w++) {
+                outFile.write((char*)&c.Forget[j].weights[w].value, sizeof(double));
+            }
+            outFile.write((char*)&c.Forget[j].bias, sizeof(double));
+
+            for (int w = 0; w < 1 + c.size; w++) {
+                outFile.write((char*)&c.Input[j].weights[w].value, sizeof(double));
+            }
+            outFile.write((char*)&c.Input[j].bias, sizeof(double));
+
+            for (int w = 0; w < 1 + c.size; w++) {
+                outFile.write((char*)&c.Output[j].weights[w].value, sizeof(double));
+            }
+            outFile.write((char*)&c.Output[j].bias, sizeof(double));
+
+            for (int w = 0; w < 1 + c.size; w++) {
+                outFile.write((char*)&c.State[j].weights[w].value , sizeof(double));
+            }
+            outFile.write((char*)&c.State[j].bias , sizeof(double));
+        }
+
+        outFile.close();
+
+        cout << "Saved data to " << filename << "Successfully" << endl;
+    } else {
+        std::cerr << "Error opening file for writing!" << std::endl;
+    }
+}
+
+bool LSTM::load(string filename) {
+    ifstream inFile(filename, std::ios::in | std::ios::binary);
+
+    if (inFile.is_open()) {
+        for (int x=0; x < c.inputSize; x++) {
+            for (int y=0; y < c.size; y++) {
+                double value;
+                inFile.read((char*)&value, sizeof(double));
+                c.W_Out[x][y] = value;
+            }
+        }
+
+        for (int j=0; j < c.size; j++) {
+            for (int w=0; w < 1 + c.size; w++) {
+                inFile.read((char*)&c.Forget[j].weights[w].value, sizeof(double));
+            }
+            inFile.read((char*)&c.Forget[j].bias, sizeof(double));
+
+            for (int w=0; w < 1 + c.size; w++) {
+                inFile.read((char*)&c.Input[j].weights[w].value, sizeof(double));
+            }
+            inFile.read((char*)&c.Input[j].bias, sizeof(double));
+
+            for (int w=0; w < 1 + c.size; w++) {
+                inFile.read((char*)&c.Output[j].weights[w].value, sizeof(double));
+            }
+            inFile.read((char*)&c.Output[j].bias, sizeof(double));
+
+            for (int w=0; w < 1 + c.size; w++) {
+                inFile.read((char*)&c.State[j].weights[w].value, sizeof(double));
+            }
+            inFile.read((char*)&c.State[j].bias, sizeof(double));
+        }
+
+        inFile.close();
+
+        cout << "Loaded data from " << filename << "Successfully" << endl;
+        return true;
+    } else {
+        return false;
+    }
 }

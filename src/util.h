@@ -7,33 +7,45 @@
 #include <vector>
 #include <sstream>
 #include <bitset>
+#include <fstream>
 
 using namespace std;
 
-vector<int> tokenize(string text) {
-    istringstream iss(text);
-    vector<string> words;
-    string word;
+class util {
+public:
+    string vocab = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .,!?'\"-;:\n";
 
-    while (iss >> word) {
-        words.push_back(word);//split input string into smaller strings that are each word
-    }
+    vector<int> tokenize(string text) {
+        vector<int> result;
+        result.reserve(text.size());
 
-    vector<int> result;
-    result.reserve(words.size());
-
-    for (int i = 0; i < words.size(); i++) {
-        string curword = words[i];
-
-        for (char c : curword) {
-            if (std::isalpha(c)) {
-                int number = std::toupper(c) - 'A' + 1;
-                result.push_back(number);//convert each letter of each word into its number value (e.g a = 1, b = 2)
+        for (int i=0; i<text.size(); i++) {
+            char letter = text[i];
+            int index = vocab.find(letter);
+            if (index != string::npos) {
+                result.push_back(index);
             }
         }
+
+        return result;
     }
 
-    return result;
-}
+    string read_txt(string filename) {
+        ifstream file(filename);
+
+        if (!file.is_open()) {
+            std::cerr << "Error opening file!" << std::endl;
+            return "";
+        }
+
+        ostringstream ss;
+        ss << file.rdbuf();
+
+        string fileContents = ss.str();
+        cout << fileContents << endl;
+        return fileContents;
+    }
+
+};
 
 #endif //LSTM_UTIL_H

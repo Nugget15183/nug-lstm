@@ -6,6 +6,7 @@
 #include <iostream>
 #include <random>
 #include "matrix.hpp"
+#include "util.h"
 
 using namespace std;
 
@@ -123,8 +124,11 @@ public:
         c.h_hist.clear();
         c.c_hist.clear();
     }
+    void save(string filename);
+    bool load(string filename);
 private:
-    Cell c = Cell(32, 27);
+    util u = util();
+    Cell c = Cell(32, u.vocab.size());
 };
 
 
