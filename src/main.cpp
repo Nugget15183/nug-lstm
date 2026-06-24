@@ -2,19 +2,20 @@
 #include <vector>
 #include <fstream>
 #include "util.h"
+#include "LSTM.h"
 
 using namespace std;
 
 int main() {
-    string test = "The quick brown fox jumps over the lazy dog";
+    LSTM lstm = LSTM();
 
-    vector<int> tokens = tokenize(test);
+    string test = "abcabcabc";
+    string test_target = test.substr(1) + test.substr(0, 1);
 
-    for (int i=0; i<tokens.size(); i++) {
-        int token = tokens[i];
+    vector<vector<int>> trainingData = {tokenize(test)};
+    vector<vector<int>> trainingDataTargets = {tokenize(test_target)};
 
-        cout << token << endl;
-    }
+    lstm.train(trainingData, trainingDataTargets, 1000);
 
     return 0;
 }

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-default_random_engine re;
+inline default_random_engine re;
 
 enum AType {
     TANH = 1,
@@ -83,10 +83,10 @@ public:
         }
 
         for (int i=0; i < size; i++) {
-            Neuron f = Neuron(inputSize + size);
-            Neuron o = Neuron(inputSize + size);
-            Neuron s = Neuron(inputSize + size);
-            Neuron in = Neuron(inputSize + size);
+            Neuron f = Neuron(1 + size);
+            Neuron o = Neuron(1 + size);
+            Neuron s = Neuron(1 + size);
+            Neuron in = Neuron(1 + size);
 
             s.atype = TANH;
 
@@ -117,8 +117,6 @@ public:
 
 class LSTM {
 public:
-    LSTM();
-
     void train(vector<vector<int>> inputs, vector<vector<int>> targets, int epochs);
     void activate(vector<int> input);
 private:

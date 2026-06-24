@@ -118,16 +118,16 @@ void LSTM::train(vector<vector<int>> inputs, vector<vector<int>> targets, int ep
                vector<double> dZ_g = vector<double>(c.size, 0.0);
                vector<double> dZ_o = vector<double>(c.size, 0.0);
 
-               vector<vector<double>> dW_Forget = vector<vector<double>>(c.size, vector<double>(c.inputSize, 0.00));
+               vector<vector<double>> dW_Forget = vector<vector<double>>(c.size, vector<double>(1 + c.size, 0.00));
                vector<double> dBias_Forget = vector<double>(c.size, 0.0);
 
-               vector<vector<double>> dW_Input = vector<vector<double>>(c.size, vector<double>(c.inputSize, 0.00));
+               vector<vector<double>> dW_Input = vector<vector<double>>(c.size, vector<double>(1 + c.size, 0.00));
                vector<double> dBias_Input = vector<double>(c.size, 0.0);
 
-               vector<vector<double>> dW_Output = vector<vector<double>>(c.size, vector<double>(c.inputSize, 0.00));
+               vector<vector<double>> dW_Output = vector<vector<double>>(c.size, vector<double>(1 + c.size, 0.00));
                vector<double> dBias_Output = vector<double>(c.size, 0.0);
 
-               vector<vector<double>> dW_State = vector<vector<double>>(c.size, vector<double>(c.inputSize, 0.00));
+               vector<vector<double>> dW_State = vector<vector<double>>(c.size, vector<double>(1 + c.size, 0.00));
                vector<double> dBias_State = vector<double>(c.size, 0.0);
 
                for (int v=0; v < probs.size(); v++) {
