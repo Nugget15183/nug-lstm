@@ -118,7 +118,11 @@ public:
 class LSTM {
 public:
     void train(vector<vector<int>> inputs, vector<vector<int>> targets, int epochs);
-    void activate(vector<int> input);
+    int activate(vector<int> input);
+    void reset() {
+        c.h_hist.clear();
+        c.c_hist.clear();
+    }
 private:
     Cell c = Cell(32, 27);
 };

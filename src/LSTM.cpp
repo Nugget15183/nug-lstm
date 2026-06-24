@@ -25,7 +25,7 @@ void LSTM::train(vector<vector<int>> inputs, vector<vector<int>> targets, int ep
            vector<int> example = inputs[i];
 
            //forward pass
-           for (int k=1; k<example.size(); k++) {//timestep loop (loop through each letter)
+           for (int k=0; k<example.size(); k++) {//timestep loop (loop through each letter)
                int curToken = example[k];
 
                vector<double> input;
@@ -218,10 +218,61 @@ void LSTM::train(vector<vector<int>> inputs, vector<vector<int>> targets, int ep
            c.c_hist.push_back(prevC);
        }
 
-        cout << "Total loss: " << totalLoss << endl;
+        if (e % 1000 == 0) {
+            cout << "Total loss: " << totalLoss << endl;
+        }
     }
 }
 
-void LSTM::activate(vector<int> input) {
+int LSTM::activate(vector<int> input) {
+    vector<double> prevH = c.h_hist.empty() ? vector<double>(c.size, 0.0) : c.h_hist.back();
+    vector<double> prevC = c.c_hist.empty() ? vector<double>(c.size, 0.0) : c.c_hist.back();
 
+    vector<double> C_t(c.size, 0.0);
+    vector<double> H_t(c.size, 0.0);
+
+    for (int i=0; i < input.size(); i++) {
+        int curToken = input[i];
+
+        vector<double> inp;
+        inp.push_back((double)curToken);
+        for (int h = 0; h < prevH.size(); h++) {
+            inp.push_back(prevH[h]);
+        }
+
+        vector<double> f(c.size, 0.0), it(c.size, 0.0), g(c.size, 0.0), o(c.size, 0.0);
+
+        for (int i = 0; i < c.Forget.size(); i++) f[i]  = c.Forget[i].activate(inp);
+        for (int i = 0; i < c.Input.size();  i++) it[i] = c.Input[i].activate(inp);
+        for (int i = 0; i < c.State.size();  i++) g[i]  = c.State[i].activate(inp);
+        for (int i = 0; i < c.Output.size(); i++) o[i]  = c.Output[i].activate(inp);
+
+        for (int j = 0; j < c.size; j++) {
+            C_t[j] = (f[j] * prevC[j]) + (it[j] * g[j]);
+            H_t[j] = o[j] * tanh(C_t[j]);
+        }
+
+        c.h_hist.push_back(H_t);
+        c.c_hist.push_back(C_t);
+
+        prevH = H_t;
+        prevC = C_t;
+    }
+
+    vector<double> logits(c.inputSize, 0.0);
+    for (int x = 0; x < c.inputSize; x++) {
+        for (int y = 0; y < c.size; y++) {
+            logits[x] += c.W_Out[x][y] * H_t[y];
+        }
+    }
+
+    double maxLogit = *max_element(logits.begin(), logits.end());
+    double sumExp = 0.0;
+    for (int v = 0; v < logits.size(); v++) sumExp += exp(logits[v] - maxLogit);
+
+    vector<double> probs(c.inputSize);
+    for (int v = 0; v < logits.size(); v++) probs[v] = exp(logits[v] - maxLogit) / sumExp;
+
+    int predicted = max_element(probs.begin(), probs.end()) - probs.begin();
+    return predicted;
 }
